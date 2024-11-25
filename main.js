@@ -8,8 +8,8 @@ var env = env ? env : (globalThis.Deno ? Deno.env : process.env);
 var getEnv = (key) => env.get ? env.get(key) : env[key];
 // console.log(env);
 var cfgs = JSON.parse(getEnv("CFG"));
-var date = "";
-var dataDir = "", dataFilePath = "";
+// var date = "";
+// var dataDir = "", dataFilePath = "";
 
 var placeholder_dot = `digraph{label="Content Not Available"}`;
 var urlToMd = async url => await fetch(`https://r.jina.ai/${url}`).then(d => d.text()).then(s => s.split("Markdown Content:")[1]);
@@ -105,15 +105,17 @@ var minifyDot = async (dotStr) => new Promise((resolve) => {
 });
 
 var ghHN = async (gh_url) => await fetch(gh_url).then(d => d.json()).then(d => {
-    date = d[0].title?.slice(-10);
-    var dateObj = new Date(date);
-    var [yyyy, mm] = [dateObj.getFullYear(), dateObj.getMonth() + 1];
-    dataDir = './data/' + yyyy + '/' + mm;
-    // await fs.writeFile(date + '.tsv',tsv_str, { flag: 'a+' }, console.log);
-    if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
-    dataFilePath = dataDir + '/' + date + '.tsv';
-    if (fs.existsSync(dataFilePath)) throw Error(`${date}.tsv already exists`);
-    return d[0].body;
+    var data = [];
+    for (const e of d) {
+        var date = e.title?.slice(-10);
+        var _o = new Date(date);
+        var dir = './data/' + _o.getFullYear() + '/' + _o.getMonth();
+        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+        var fpath = dir + '/' + date + '.tsv';
+        if (fs.existsSync(fpath)) continue; // skip existing file
+        data.push({ fpath, body: e.body });
+    }
+    return data;
 });
 
 var hnToDot = async (hnData) => {
@@ -127,7 +129,7 @@ var hnToDot = async (hnData) => {
                 if (cfgs[j].err >= 3) continue;
                 try { return await mdToDot(md, cfgs[j]); } catch (e) {
                     cfgs[j].err = (cfgs[j].err || 0) + 1;
-                    console.error(e, "err LLM API id", j, "count", cfgs[j].err);
+                    console.error("err LLM API id", j, "count", cfgs[j].err);
                     continue;
                 }
             }
@@ -139,15 +141,17 @@ var hnToDot = async (hnData) => {
     return hnData;
 }
 
-var main = async (perPage = 1, page = 1) => {
+var main = async (perPage = 1, page = 1) => { // HN to DOT TSV
     var gh_url = `https://api.github.com/repos/headllines/hackernews-daily/issues?per_page=${perPage}&page=${page}`;
-    var final_data = await ghHN(gh_url).then(parseNews).then(hnToDot);
-    console.log(final_data);
-    var tsv_str = toTSV(final_data);
-    console.log(tsv_str);
-
-    if (!fs.existsSync(dataFilePath)) fs.writeFileSync(dataDir + '/' + date + '.tsv', tsv_str);
-    console.log("done.");
+    // old: var final_data = await ghHN(gh_url).then(parseNews).then(hnToDot);
+    var fPaths = [];
+    var ghHNdata = await ghHN(gh_url);
+    for (const { fpath, body } of ghHNdata) {
+        const final_data = await parseNews(body).then(hnToDot);
+        fs.writeFileSync(fpath, toTSV(final_data));
+        fPaths.push(fpath);
+    }
+    console.log("done. generated files:", fPaths.join(", "));
     process.exit(0);
     // fs.writeFileSync('./data/' + date + '.tsv', tsv_str);
 }
