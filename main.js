@@ -9,6 +9,7 @@ var getEnv = (key) => env.get ? env.get(key) : env[key];
 // console.log(env);
 var cfgs = JSON.parse(getEnv("CFG"));
 var date = "";
+var dataDir = "", dataFilePath = "";
 
 var placeholder_dot = `digraph{label="Content Not Available"}`;
 var urlToMd = async url => await fetch(`https://r.jina.ai/${url}`).then(d => d.text()).then(s => s.split("Markdown Content:")[1]);
@@ -105,7 +106,13 @@ var minifyDot = async (dotStr) => new Promise((resolve) => {
 
 var ghHN = async (gh_url) => await fetch(gh_url).then(d => d.json()).then(d => {
     date = d[0].title?.slice(-10);
-
+    var dateObj = new Date(date);
+    var [yyyy, mm] = [dateObj.getFullYear(), dateObj.getMonth() + 1];
+    dataDir = './data/' + yyyy + '/' + mm;
+    // await fs.writeFile(date + '.tsv',tsv_str, { flag: 'a+' }, console.log);
+    if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+    dataFilePath = dataDir + '/' + date + '.tsv';
+    if (fs.existsSync(dataFilePath)) throw Error(`${date}.tsv already exists`);
     return d[0].body;
 });
 
@@ -139,14 +146,9 @@ var main = async (perPage = 1, page = 1) => {
     var tsv_str = toTSV(final_data);
     console.log(tsv_str);
 
-    var dateObj = new Date(date);
-    var [yyyy, mm] = [dateObj.getFullYear(), dateObj.getMonth() + 1];
-    var dataDir = './data/' + yyyy + '/' + mm;
-    // await fs.writeFile(date + '.tsv',tsv_str, { flag: 'a+' }, console.log);
-    if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
-    var dataFilePath = dataDir + '/' + date + '.tsv';
     if (!fs.existsSync(dataFilePath)) fs.writeFileSync(dataDir + '/' + date + '.tsv', tsv_str);
-    console.log("done.")
+    console.log("done.");
+    process.exit(0);
     // fs.writeFileSync('./data/' + date + '.tsv', tsv_str);
 }
 
