@@ -153,7 +153,7 @@ var main = async (perPage = 1, page = 1) => { // HN to DOT TSV
     }
     console.log("done. generated files:", fPaths.join(", "));
     process.exit(0);
-    // fs.writeFileSync('./data/' + date + '.tsv', tsv_str);
+    // old: fs.writeFileSync('./data/' + date + '.tsv', tsv_str);
 }
 
 await main();
