@@ -123,16 +123,31 @@ var ghHN = async (gh_url) => await fetch(gh_url).then(d => d.json()).then(d => {
 
 var hnToDot = async (hnData) => {
     var promises = [];
+    var MAXERR = 5;
 
     for (let i = 0; i < hnData.url.length; i++) {
         const url = hnData.url[i];
         const promise = urlToMd(url).then(async (md) => {
             // fault proof LLM API pool
             for (let j = 0; j < cfgs.length; j++) {
-                if (cfgs[j].err >= 3) continue;
+
+                if (cfgs[j].err >= MAXERR) {
+                    if (cfgs[j].resetTime && Date.now() < cfgs[j].resetTime) {
+                        continue;
+                    } else if (!cfgs[j].resetTime || Date.now() >= cfgs[j].resetTime) {
+                        cfgs[j].err = 0;  // reset err count
+                        cfgs[j].resetTime = null; // rm reset time
+                    }
+                }
+
                 try { return await mdToDot(md, cfgs[j]); } catch (e) {
                     cfgs[j].err = (cfgs[j].err || 0) + 1;
                     console.error("err LLM API id", j, "count", cfgs[j].err);
+                    // reset it after 5 min when err count >= 3
+                    if (cfgs[j].err >= MAXERR) {
+                        cfgs[j].resetTime = Date.now() + 5 * 60 * 1000; // 5 min
+                        console.log(`API config ${j} disabled for 5 minutes due to excessive errors.`);
+                    }
                     continue;
                 }
             }
