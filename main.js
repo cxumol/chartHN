@@ -161,4 +161,4 @@ var main = async (perPage = 1, page = 1) => { // HN to DOT TSV
 
 await main();
 
-export default main;
+export {main};
