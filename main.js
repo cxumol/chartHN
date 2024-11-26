@@ -108,8 +108,11 @@ var ghHN = async (gh_url) => await fetch(gh_url).then(d => d.json()).then(d => {
     var data = [];
     for (const e of d) {
         var date = e.title?.slice(-10);
-        var _o = new Date(date);
-        var dir = './data/' + _o.getFullYear() + '/' + _o.getMonth();
+        /*var _o = new Date(date);
+        var dir = './data/' + _o.getFullYear() + '/' + (_o.getMonth()+1).toString().padStart(2, '0');*/
+        var _s = date.split("-");
+        var dir = './data/' + _s[0] + '/' + _s[1].padStart(2, '0');
+        // console.log(dir); process.exit(0);
         if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
         var fpath = dir + '/' + date + '.tsv';
         if (fs.existsSync(fpath)) continue; // skip existing file
