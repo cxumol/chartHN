@@ -159,6 +159,8 @@ var main = async (perPage = 1, page = 1) => { // HN to DOT TSV
     // old: fs.writeFileSync('./data/' + date + '.tsv', tsv_str);
 }
 
-await main();
+if (import.meta.url === "file://" + process.argv[1]) {
+    await main();
+} else { console.log(import.meta.url); }
 
-export {main};
+export { main };
