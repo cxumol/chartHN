@@ -147,7 +147,7 @@ var main = async (perPage = 1, page = 1) => { // HN to DOT TSV
     var fPaths = [];
     var ghHNdata = await ghHN(gh_url);
     for (const { fpath, body } of ghHNdata) {
-        const final_data = await parseNews(body).then(hnToDot);
+        const final_data = await hnToDot(parseNews(body));
         fs.writeFileSync(fpath, toTSV(final_data));
         fPaths.push(fpath);
     }
