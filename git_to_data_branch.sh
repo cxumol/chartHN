@@ -1,6 +1,7 @@
 mkdir -p ../chartHN_tmp
 mv .env ../chartHN_tmp/ || echo "no .env"
-mv data ../chartHN_tmp/
+# mv data ../chartHN_tmp/
+rsync -av data/ ../chartHN_tmp/
 
 
 git checkout data
