@@ -7,7 +7,7 @@ rsync -av data/ ../chartHN_tmp/data
 git checkout data
 git rm -r --cached .
 # Move contents of data to the root, handling subdirectories correctly. -a preserves attributes
-cp -ru ../chartHN_tmp/data ./
+rsync -au ../chartHN_tmp/data ./
 git add .
 git commit -m "update $(date +%Y-%m-%d)"
 git push
