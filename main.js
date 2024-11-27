@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import process from 'node:process';
 
 // TODO: node process never exits
+import buildIndexJson from './_buildIndex.js';
 
 var env = env ? env : (globalThis.Deno ? Deno.env : process.env);
 var getEnv = (key) => env.get ? env.get(key) : env[key];
@@ -170,6 +171,8 @@ var main = async (perPage = 1, page = 1) => { // HN to DOT TSV
         fPaths.push(fpath);
     }
     console.log("done. generated files:", fPaths.join(", "));
+    buildIndexJson();
+
     process.exit(0);
     // old: fs.writeFileSync('./data/' + date + '.tsv', tsv_str);
 }
