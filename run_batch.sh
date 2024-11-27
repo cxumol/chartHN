@@ -18,6 +18,7 @@ git checkout data
 rsync -av data/ ../chartHN_tmp/data
 git checkout master
 cp -ru ../chartHN_tmp/* ./
+cp -ru ../chartHN_tmp/.* ./
 
 node --experimental-default-type=module --env-file=.env batch.js $per_page $page
 
