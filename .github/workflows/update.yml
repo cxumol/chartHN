@@ -57,7 +57,7 @@ jobs:
       - name: Checkout data branch and update
         run: |
           git checkout data
-          git rm -r --cached .
+          # git rm -r --cached .
           rsync -au ../chartHN_tmp/data/ ./
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
