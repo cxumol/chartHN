@@ -38,10 +38,12 @@ jobs:
             mkdir -p ~/.local/bin/
             mv "dot-minify" ~/.local/bin/
             echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Install dot
+        run: |
+          sudo apt-get install -y graphviz
           
       - name: Run main script
-        env:
-          CFG: ${{ secrets.CFG }}
         run: node --experimental-default-type=module main.js
 
       - name: Move .env and updated data to temporary directory
