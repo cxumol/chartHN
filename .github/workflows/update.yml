@@ -17,6 +17,8 @@ jobs:
           fetch-depth: 0 # Fetch all history for branch comparison
 
       - uses: actions/setup-node@v4.1.0
+        with:
+          node-version: '22.x'
 
       # - name: Install dependencies
       #   run: npm install
