@@ -1,0 +1,50 @@
+name: Daily Data Update
+
+on:
+  schedule:
+    - cron: '30 2 * * *'  # Runs every day at 02:30 UTC, upstream updates around 00:50 UTC
+  workflow_dispatch:    # Allows manual triggering of the workflow
+
+jobs:
+  update_data:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: master
+          fetch-depth: 0 # Fetch all history for branch comparison
+
+      - uses: actions/setup-node@v4.1.0
+
+      # - name: Install dependencies
+      #   run: npm install
+
+      - name: Checkout data branch and copy data
+        run: |
+          mkdir -p ../chartHN_tmp/data
+          git checkout data
+          rsync -av data/ ../chartHN_tmp/data/
+          git checkout master
+          rsync -au ../chartHN_tmp/. ./
+
+      - name: Run main script
+        run: node --experimental-default-type=module main.js
+
+      - name: Move .env and updated data to temporary directory
+        run: |
+          mkdir -p ../chartHN_tmp
+          mv .env ../chartHN_tmp/ || echo "no .env"
+          rsync -av data/ ../chartHN_tmp/data/
+
+      - name: Checkout data branch and update
+        run: |
+          git checkout data
+          git rm -r --cached .
+          rsync -au ../chartHN_tmp/data/ ./
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          git commit -m "update $(date +%Y-%m-%d)" || echo "No changes to commit"
+          git push origin data || echo "No changes to push"
