@@ -58,7 +58,7 @@ jobs:
         run: |
           git checkout data
           # git rm -r --cached .
-          git rm -r data
+          git rm -r data || echo './data is clear'
           rsync -au ../chartHN_tmp/data/ ./
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
