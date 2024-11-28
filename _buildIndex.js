@@ -108,4 +108,4 @@ if (import.meta.url === "file://" + process.argv[1]) {
     buildIndexJson();
 } else { console.log(import.meta.url); }
 
-export default buildIndexJson;
+export { buildIndexJson };

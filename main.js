@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import process from 'node:process';
 
 // TODO: node process never exits
-import buildIndexJson from './_buildIndex.js';
+import { buildIndexJson } from './_buildIndex.js';
 
 var env = env ? env : (globalThis.Deno ? Deno.env : process.env);
 var getEnv = (key) => env.get ? env.get(key) : env[key];
