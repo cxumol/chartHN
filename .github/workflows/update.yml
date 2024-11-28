@@ -40,6 +40,8 @@ jobs:
             echo "$HOME/.local/bin" >> $GITHUB_PATH
           
       - name: Run main script
+        env:
+          CFG: ${{ secrets.CFG }}
         run: node --experimental-default-type=module main.js
 
       - name: Move .env and updated data to temporary directory
