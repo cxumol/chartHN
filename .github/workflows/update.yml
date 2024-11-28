@@ -44,6 +44,8 @@ jobs:
           sudo apt-get install -y graphviz
           
       - name: Run main script
+        env:
+          CFG: ${{ vars.CFG }}
         run: node --experimental-default-type=module main.js
 
       - name: Move .env and updated data to temporary directory
