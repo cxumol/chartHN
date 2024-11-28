@@ -31,6 +31,14 @@ jobs:
           git checkout master
           rsync -au ../chartHN_tmp/. ./
 
+      - name: Install dot-minify
+        run: |
+            wget -O "dot-minify" https://github.com/cxumol/dot-minify/releases/download/latest/dot-minify-x86_64-linux-musl || wget https://github.com/cxumol/dot-minify/releases/download/latest/dot-minify
+            chmod +x "dot-minify"
+            mkdir -p ~/.local/bin/
+            mv "dot-minify" ~/.local/bin/
+            echo "$HOME/.local/bin" >> $GITHUB_PATH
+          
       - name: Run main script
         run: node --experimental-default-type=module main.js
 
