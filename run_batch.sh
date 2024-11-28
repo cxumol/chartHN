@@ -15,7 +15,7 @@ fi
 
 mkdir -p ../chartHN_tmp/data
 git checkout data
-rsync -av data/ ../chartHN_tmp/data
+rsync -av ./* ../chartHN_tmp/data
 git checkout master
 rsync -au ../chartHN_tmp/. ./ # dot. to cp hidden files
 
