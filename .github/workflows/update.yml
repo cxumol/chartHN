@@ -27,7 +27,7 @@ jobs:
         run: |
           mkdir -p ../chartHN_tmp/data
           git checkout data
-          rsync -av --exclude='.git' ./ ../chartHN_tmp/data/
+          rsync -av --exclude='.git' ./* ../chartHN_tmp/data/
           git checkout master
           rsync -au ../chartHN_tmp/. ./
 
@@ -52,12 +52,13 @@ jobs:
         run: |
           mkdir -p ../chartHN_tmp
           mv .env ../chartHN_tmp/ || echo "no .env"
-          rsync -av data/ ../chartHN_tmp/data/
+          rsync -auv --remove-source-files data/ ../chartHN_tmp/data/
 
       - name: Checkout data branch and update
         run: |
           git checkout data
           # git rm -r --cached .
+          git rm -r data
           rsync -au ../chartHN_tmp/data/ ./
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
