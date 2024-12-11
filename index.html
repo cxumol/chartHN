@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8" />
+  <title>ChartHN</title>
+  <style>
+    /*github.com/louismerlin/concrete.css*/
+    :root{--fg:#111;--bg:#fff}@media (prefers-color-scheme:dark){:root{--fg:#fff;--bg:#111}}html{font-size:1.25rem;box-sizing:border-box}*,::after,::before{box-sizing:inherit;text-decoration-thickness:.1rem}body{margin:0;background:var(--bg);color:var(--fg);font-family:Helvetica,Arial,sans-serif}a{color:var(--fg)}/*figure{margin:0}figcaption{text-align:right;font-size:.8em;border-bottom:.2rem solid var(--fg);padding-bottom:.2rem}*/
+    /*layout*/
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .as-main {
+      display: flex;
+      flex-direction: row;
+      flex: 1;
+      overflow: hidden;
+    }
+    .as-main > * {
+      overflow-y: auto;
+    }
+    aside, section {
+      padding: 1em;
+    }
+    .left-col {
+      width: 20%;
+      padding-right: 0.5em;
+    }
+    .right-col {
+      min-width: 15rem;
+      max-width: 20%;
+    }
+    #mainContent {
+      flex: 1;
+      overflow-x: auto;
+      padding-left: 0.5em;
+      padding-right: 0.5em;
+    }
+    section article + article {
+      padding: 2rem 0;
+    }
+    /*extra spacing*/
+    ul li {
+      padding: 0.2em 0;
+    }
+    /* Styles for SVG diagram UX */
+    .viz-container {
+      max-height: 30vh; /* Default preview height */
+      overflow: hidden;
+      cursor: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGhlaWdodD0iMjQiIHZpZXdCb3g9IjEyMCAtODQwIDcyMCA3MjAiIHdpZHRoPSIyNCI+PHBhdGggZD0iTTc4NC0xMjAgNTMyLTM3MnEtMzAgMjQtNjkgMzh0LTgzIDE0cS0xMDkgMC0xODQuNS03NS41VDEyMC01ODB0NzUuNS0xODQuNVQzODAtODQwdDE4NC41IDc1LjVUNjQwLTU4MHEwIDQ0LTE0IDgzdC0zOCA2OWwyNTIgMjUyek0zODAtNDAwcTc1IDAgMTI3LjUtNTIuNVQ1NjAtNTgwdC01Mi41LTEyNy41VDM4MC03NjB0LTEyNy41IDUyLjVUMjAwLTU4MHQ1Mi41IDEyNy41VDM4MC00MDBtLTQwLTYwdi04MGgtODB2LTgwaDgwdi04MGg4MHY4MGg4MHY4MGgtODB2ODB6Ii8+PC9zdmc+'), auto; /* Indicate clickable for zoom */
+      position: relative;
+    }
+    .viz-container.full-size {
+      max-height: 80vh; /* Full size height */
+      cursor: auto;
+      overflow: auto;
+    }
+    .viz-container::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom, transparent, rgba(128, 128, 128, 0.5));
+      pointer-events: none;
+    }
+    .viz-container.full-size::after {
+      background: none;
+    }
+
+/*     button.zoom-out {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      height: 10%;
+      width: 10%;
+      transform: translate(-50%, -50%);
+      background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGhlaWdodD0iMjQiIHZpZXdCb3g9IjEyMCAtODQwIDcyMCA3MjAiIHdpZHRoPSIyNCI+PHBhdGggZD0iTTc4NC0xMjAgNTMyLTM3MnEtMzAgMjQtNjkgMzh0LTgzIDE0cS0xMDkgMC0xODQuNS03NS41VDEyMC01ODB0NzUuNS0xODQuNVQzODAtODQwdDE4NC41IDc1LjVUNjQwLTU4MHEwIDQ0LTE0IDgzdC0zOCA2OWwyNTIgMjUyek0zODAtNDAwcTc1IDAgMTI3LjUtNTIuNVQ1NjAtNTgwdC01Mi41LTEyNy41VDM4MC03NjB0LTEyNy41IDUyLjVUMjAwLTU4MHQ1Mi41IDEyNy41VDM4MC00MDBNMjgwLTU0MHYtODBoMjAwdjgweiIvPjwvc3ZnPg==')  no-repeat;
+      display: none;
+      z-index: 10;
+    }
+
+    .viz-container.full-size button.zoom-out {
+      display: block;
+    } */
+  </style>
+</head>
+<body>
+  <header>
+    <h1>ChartHN</h1>
+  </header>
+  <main class="as-main">
+    <aside class="left-col">
+      <select id="yearSelect" onchange="updateMonthSelect()"></select>
+      <select id="monthSelect" onchange="listDate(this.value)"></select>
+      <ul id="dateList"></ul>
+    </aside>
+    <section id="mainContent">
+    </section>
+    <aside class="right-col">
+      <ul id="toc"></ul>
+    </aside>
+  </main>
+  <script>
+var APP=document.title;
+var urlPrefix = "https://cdn.jsdelivr.net/gh/cxumol/chartHN@data";
+var getId = id => document.getElementById(id);
+var viz = undefined;
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@viz-js/viz@3.11.0/lib/viz-standalone.min.js"></script>
+  <script>
+var indexData;
+var dailyData;
+
+var renderViz = (elm, DOTstr) => {
+  var svg = viz.renderSVGElement(DOTstr, { engine: "fdp", graphAttributes: { sep: "+12", K: 0.5, len: 0.3, fixedsize: false, width: 1 } });
+  elm.innerHTML = "";
+  elm.appendChild(svg);
+  // elm.innerHTML += `<button class="zoom-out" onclick="event.stopPropagation();this.parentElement.classList.remove('full-size')"></button>`;
+};
+
+var loadIndex = async () => {
+  await fetch(`${urlPrefix}/index.json`).then(r=>r.json()).then(d=>window.indexData=d.data)//.catch(e=>console.error(e))
+
+  var allYears = new Set(indexData.years);
+  indexData.months.forEach(ym => allYears.add(ym.slice(0, 4)));
+  indexData.days.forEach(d => allYears.add(d.slice(0, 4)));
+  allYears.forEach(y => getId("yearSelect").add(new Option(y, y)));
+  
+  viz = await Viz.instance();
+};
+
+var updateMonthSelect = () => {
+  var monthSelect = getId("monthSelect");
+  monthSelect.innerHTML = "";
+
+  var theYear = getId("yearSelect").value;
+  var allMonths = new Set();
+  if(indexData.years.includes(theYear)){
+    for (let m = 1; m <= 12; m++) allMonths.add(theYear + "-" + m.toString().padStart(2, '0'));
+  }else{
+    indexData.months.filter(m => m.startsWith(theYear)).forEach(m => allMonths.add(m));
+    indexData.days.filter(d => d.startsWith(theYear)).forEach(d => allMonths.add(d.slice(0, 7)));
+  }
+  
+  Array.from(allMonths).sort().forEach(m => monthSelect.add(new Option(m, m)));
+}
+
+var listDate = (yearMonth) => {
+  var dateList = getId("dateList");
+  dateList.innerHTML = "";
+
+  var [yyyy, mm] = yearMonth.split('-');
+  
+  var allDates = new Set();
+  
+  var monthLen = new Date(yyyy, mm, 0).getDate(); // js trick
+  if (indexData.years.includes(yyyy) || indexData.months.includes(yearMonth)) {
+    for (let d = 1; d <= monthLen; d++) allDates.add(yearMonth + "-" + d.toString().padStart(2, '0'));
+  } else {
+    indexData.days.filter(day => day.startsWith(yearMonth)).forEach(day => allDates.add(day));
+  }
+  
+  var _all = Array.from(allDates).sort();
+  _all.forEach(date => {
+    if (isValidDate(date)) dateList.innerHTML += `<li><a href="#" onclick="loadDate('${date}')">${date}</a></li>`;
+  });
+  return _all;
+};
+
+
+var isValidDate =s=> !isNaN(new Date(s));
+
+var loadDate = async (date) => {
+  if (!isValidDate(date)) return;
+  var mainContent = getId("mainContent");
+  mainContent.innerHTML = "<center><h1>Loading ...</h1></center>";
+  try{
+    const response = await fetch(`${urlPrefix}/${date.slice(0, 4)}/${date.slice(5, 7)}/${date}.tsv`);
+    if (!response.ok) throw Error(`http error ${response.status}`);
+    const tsv = await response.text();
+    dailyData = tsv.trim().split("\n").slice(1).map(row => row.split("\t")); // Parse TSV, skip header
+    if (!dailyData.length || dailyData.length<1) throw Error(`bad data source \n ${tsv}`);
+  }catch(e){
+    mainContent.innerHTML = `<center><h1>Data of requested date ${date} is not available. Try again?</h1><pre>${e}</pre></center>`;
+    return;
+  }
+  mainContent.innerHTML = "";
+  var toc = getId("toc");
+  toc.innerHTML = "";
+
+  dailyData.forEach(row => {
+    var [title, url, points, by, hnId, dot] = row;
+    if (!title) return;
+    const id = `hn-${hnId}`;
+    mainContent.innerHTML += `
+    <article id="${id}">
+      <h2><a href="${url}">${title}</a></h2>
+      <a href="https://news.ycombinator.com/item?id=${hnId}">${points} points on Hacker News posted by ${by}</a>
+      <figure class="viz-container" onclick="this.classList.add('full-size')">
+      </figure>
+    </article>
+    `;
+    renderViz(mainContent.lastElementChild.lastElementChild, dot); // figure.viz-container
+    toc.innerHTML += `<li><a href="#${id}">${title}</a></li>`;
+  });
+  window.updateUrl(date);
+  var newTitle = `${APP} ${date}`;
+  document.title = newTitle;
+  document.querySelector('header>h1').textContent=newTitle;
+};
+  </script>
+  
+  <script>
+    // window + document
+window.updateUrl = (date) => {
+    const url = new URL(window.location.href);
+    url.searchParams.set("date", date);
+    window.history.pushState({ date }, "", url);
+};
+window.onpopstate =e=> e.state?.date && loadDate(e.state.date);
+
+var urlDate = new URLSearchParams(window.location.search).get("date");
+loadIndex().then(()=>{
+  var [yearSelect, monthSelect] = [getId("yearSelect"), getId("monthSelect")];
+  var _toLast=s=>{s.selectedIndex = s.options.length - 1;}
+  _toLast(yearSelect);
+  updateMonthSelect();
+  _toLast(monthSelect);
+  var dates = listDate(monthSelect.value);
+  if (urlDate && isValidDate(urlDate)) {
+    // Check urlDate w/ select option
+    let urlDateOK = false;
+    const yearOption = Array.from(yearSelect.options).find((option) => option.value === urlDate.split('-')[0]);
+    if (yearOption) {
+      yearSelect.value = yearOption.value;
+      updateMonthSelect();
+      const monthOption = Array.from(monthSelect.options).find((option) => option.value === urlDate.substring(0,7));
+      if(monthOption){
+        monthSelect.value = monthOption.value;
+        urlDateOK = true;
+      }
+    }
+    if (!urlDateOK){
+      // isValidDate() checked to prevent XSS
+      getId("mainContent").innerHTML = `<center><h1>Data of requested date ${urlDate} in URL is not available</h1></center>`;
+      return;
+    }
+    dates = listDate(monthSelect.value);
+    loadDate(urlDate);
+  } else { // defaults to recent if date param invalid
+    var recent = dates[dates.length-1];
+    if (recent) loadDate(recent);
+  }
+})
+  </script>
+</body>
+</html>
