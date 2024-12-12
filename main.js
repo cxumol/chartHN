@@ -109,7 +109,8 @@ var ghHN = async (gh_url) => await fetch(gh_url).then(d => d.json()).then(d => {
     var data = [];
     for (const e of d) {
         var date = e.title?.slice(-10);
-        /*var _o = new Date(date);
+        if(date.length !== 10 || isNaN(new Date(date))) continue; // skip invalid date
+        /*var _o =;
         var dir = './data/' + _o.getFullYear() + '/' + (_o.getMonth()+1).toString().padStart(2, '0');*/
         var _s = date.split("-");
         var dir = './data/' + _s[0] + '/' + _s[1].padStart(2, '0');
