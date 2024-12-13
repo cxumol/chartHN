@@ -15,8 +15,8 @@ var cfgs = JSON.parse(getEnv("CFG"));
 var placeholder_dot = `digraph{label="Content Not Available"}`;
 var urlToMd = async url => await fetch(`https://r.jina.ai/${url}`).then(d => d.text()).then(s => s.split("Markdown Content:")[1]);
 var mdToDot = async (md, cfg) => {
-    var respDotJson;
-    var respDotTxt = await fetch(cfg.base + '/chat/completions', {
+    var respDotJson;var respDotTxt;
+    var _r = await fetch(cfg.base + '/chat/completions', {
         method: 'POST', headers: { Authorization: 'Bearer ' + cfg.key, 'Content-Type': 'application/json' },
         body: JSON.stringify({
             model: cfg.model, temperature: 0.6, messages: [
@@ -24,11 +24,12 @@ var mdToDot = async (md, cfg) => {
                 { role: "user", content: "Create a Graphviz DOT diagram to visualize the main idea of following content: \n" + md }
             ]
         })
-    }).then(d => d.text());
+    })
+    respDotTxt = await _r.text();
     if (respDotTxt === "和谐") throw Error("和谐")
     try {
         respDotJson = JSON.parse(respDotTxt);
-    } catch { console.error(respDotTxt); throw Error("Bad LLM API answer"); }
+    } catch { console.error(_r.status, respDotTxt.slice(0,10)); throw Error("Bad LLM API answer"); }
     var ans = respDotJson?.choices?.[0]?.message?.content?.trim();
     if (!ans) { console.error(respDotJson.error?.message ? respDotJson.error.message : respDotJson.slice(0, 20)); throw Error("Bad LLM API answer"); }
     ans = ans.match(/```.*?\n(.*?)```/s)?.[1];
