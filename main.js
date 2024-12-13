@@ -182,11 +182,13 @@ var main = async (perPage = 1, page = 1) => { // HN to DOT TSV
     var fPaths = [];
     var ghHNdata = await ghHN(gh_url);
     for (const { fpath, body } of ghHNdata) {
+        console.log(`Begin ${fpath.split('/').slice(-1)[0]}`);
         const final_data = await hnToDot(parseNews(body));
         fs.writeFileSync(fpath, toTSV(final_data));
         fPaths.push(fpath);
+        console.log(`(${fPaths.length}/${ghHNdata.length}) ${fpath.split('/').slice(-1)[0]} done.`);
     }
-    console.log("done. generated files:", fPaths.join(", "));
+    console.log("All done. Generated files:", fPaths.join(", "));
     buildIndexJson();
 
     process.exit(0);
