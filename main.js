@@ -25,6 +25,7 @@ var mdToDot = async (md, cfg) => {
             ]
         })
     }).then(d => d.text());
+    if (respDotTxt === "和谐") throw Error("和谐")
     try {
         respDotJson = JSON.parse(respDotTxt);
     } catch { console.error(respDotTxt); throw Error("Bad LLM API answer"); }
@@ -148,6 +149,9 @@ var hnToDot = async (hnData) => {
 
                 try { return await mdToDot(md, cfgs[j]); } catch (e) {
                     // console.error(e); // DEBUG ONLY
+                    if (e.message === "和谐") {
+                        console.error(`和谐 dateID ${i} hnID ${hnData.hnID[i]} API ${j}`)
+                    }
                     cfgs[j].err = (cfgs[j].err || 0) + 1;
                     console.error("err LLM API id", j, "count", cfgs[j].err);
                     // reset it after 5 min when err count >= 3
