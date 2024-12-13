@@ -15,7 +15,8 @@ var cfgs = JSON.parse(getEnv("CFG"));
 var placeholder_dot = `digraph{label="Content Not Available"}`;
 var urlToMd = async url => await fetch(`https://r.jina.ai/${url}`).then(d => d.text()).then(s => s.split("Markdown Content:")[1]);
 var mdToDot = async (md, cfg) => {
-    var respDotJson = await fetch(cfg.base + '/chat/completions', {
+    var respDotJson;
+    var respDotTxt = await fetch(cfg.base + '/chat/completions', {
         method: 'POST', headers: { Authorization: 'Bearer ' + cfg.key, 'Content-Type': 'application/json' },
         body: JSON.stringify({
             model: cfg.model, temperature: 0.6, messages: [
@@ -23,9 +24,12 @@ var mdToDot = async (md, cfg) => {
                 { role: "user", content: "Create a Graphviz DOT diagram to visualize the main idea of following content: \n" + md }
             ]
         })
-    }).then(d => d.json());
+    }).then(d => d.text());
+    try {
+        respDotJson = JSON.parse(respDotTxt);
+    } catch { console.error(respDotTxt); throw Error("Bad LLM API answer"); }
     var ans = respDotJson?.choices?.[0]?.message?.content?.trim();
-    if (!ans) { console.error(respDotJson.error?.message ? respDotJson.error.message : respDotJson.slice(0,20)); throw Error("Bad LLM API answer"); }
+    if (!ans) { console.error(respDotJson.error?.message ? respDotJson.error.message : respDotJson.slice(0, 20)); throw Error("Bad LLM API answer"); }
     ans = ans.match(/```.*?\n(.*?)```/s)?.[1];
     ans = await minifyDot(ans);
     if (!await validateDot(ans)) throw Error("Bad Dot data, from model: " + cfg.model);
@@ -109,7 +113,7 @@ var ghHN = async (gh_url) => await fetch(gh_url).then(d => d.json()).then(d => {
     var data = [];
     for (const e of d) {
         var date = e.title?.slice(-10);
-        if(date.length !== 10 || isNaN(new Date(date))) continue; // skip invalid date
+        if (date.length !== 10 || isNaN(new Date(date))) continue; // skip invalid date
         /*var _o =;
         var dir = './data/' + _o.getFullYear() + '/' + (_o.getMonth()+1).toString().padStart(2, '0');*/
         var _s = date.split("-");
@@ -143,6 +147,7 @@ var hnToDot = async (hnData) => {
                 }
 
                 try { return await mdToDot(md, cfgs[j]); } catch (e) {
+                    // console.error(e); // DEBUG ONLY
                     cfgs[j].err = (cfgs[j].err || 0) + 1;
                     console.error("err LLM API id", j, "count", cfgs[j].err);
                     // reset it after 5 min when err count >= 3
