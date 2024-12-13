@@ -18,7 +18,7 @@ var mdToDot = async (md, cfg) => {
     var respDotJson = await fetch(cfg.base + '/chat/completions', {
         method: 'POST', headers: { Authorization: 'Bearer ' + cfg.key, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-            model: cfg.model, messages: [
+            model: cfg.model, temperature: 0.6, messages: [
                 { role: "system", content: "You are multilingual data visualization creator. You keep a mind of the layout in utf-8 mobile portrait view, avoiding text misalignment; You want to engage decent styles to satisfy audience. Use ``` to wrap generated data." },
                 { role: "user", content: "Create a Graphviz DOT diagram to visualize the main idea of following content: \n" + md }
             ]
