@@ -135,6 +135,7 @@ var hnToDot = async (hnData) => {
 
     for (let i = 0; i < hnData.url.length; i++) {
         const url = hnData.url[i];
+        const hnId = hnData.hnId[i];
         const promise = urlToMd(url).then(async (md) => {
             // fault proof LLM API pool
             for (let j = 0; j < cfgs.length; j++) {
@@ -151,7 +152,7 @@ var hnToDot = async (hnData) => {
                 try { return await mdToDot(md, cfgs[j]); } catch (e) {
                     // console.error(e); // DEBUG ONLY
                     if (e.message === "和谐") {
-                        console.error(`和谐 sID ${i} API ${j}`);
+                        console.error(`和谐 sID ${i} hnID ${hnId} API ${j}`);
                         continue;
                     }
                     cfgs[j].err = (cfgs[j].err || 0) + 1;
