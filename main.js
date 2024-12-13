@@ -25,7 +25,7 @@ var mdToDot = async (md, cfg) => {
         })
     }).then(d => d.json());
     var ans = respDotJson?.choices?.[0]?.message?.content?.trim();
-    if (!ans) { console.error(respDotJson.error?.message ? respDotJson.error.message : respDotJson); throw Error("Bad LLM API answer"); }
+    if (!ans) { console.error(respDotJson.error?.message ? respDotJson.error.message : respDotJson.slice(0,20)); throw Error("Bad LLM API answer"); }
     ans = ans.match(/```.*?\n(.*?)```/s)?.[1];
     ans = await minifyDot(ans);
     if (!await validateDot(ans)) throw Error("Bad Dot data, from model: " + cfg.model);
@@ -83,7 +83,7 @@ var parseNews = txt => {
             hnData.by.push(user);
             hnData.hnId.push(hnId);
         } else {
-            console.error("something wrong \t", url, title, points, user, hnId);
+            console.error("ghHN->TSV parse err\t", url, title, points, user, hnId);
         }
     }
     hnData.dot = new Array(hnData.by.length).fill(null);
