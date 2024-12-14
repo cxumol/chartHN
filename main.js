@@ -161,7 +161,7 @@ var hnToDot = async (hnData) => {
                     cfgs[j].err = (cfgs[j].err || 0) + 1;
                     console.error("err LLM API id", j, "count", cfgs[j].err);
                     // reset it after 5 min when err count >= 3
-                    if (cfgs[j].err >= MAXERR) {
+                    if (cfgs[j].err >= MAXERR - 2) {
                         cfgs[j].resetTime = Date.now() + 5 * 60 * 1000; // 5 min
                         console.log(`API config ${j} disabled for 5 minutes due to excessive errors.`);
                     }
