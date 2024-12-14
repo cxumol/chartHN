@@ -5,6 +5,7 @@ rsync -auv --remove-source-files data/ ../chartHN_tmp/data/
 
 
 git checkout data
+git pull
 git rm -r data || echo './data is clear'
 # Move contents of data to the root, handling subdirectories correctly. -a preserves attributes
 rsync -au ../chartHN_tmp/data/ ./
