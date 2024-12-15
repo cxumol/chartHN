@@ -124,8 +124,8 @@ var renderViz = (elm, DOTstr) => {
   if (w<16||w>1080)svg = viz.renderSVGElement(DOTstr, { engine: "dot", graphAttributes: { rankdir:"LR" } });
   w = getWidth(svg);
   if(w>960){
-    _svg=viz.renderSVGElement(DOTstr, { engine: "dot", graphAttributes: { rankdir:"TB" } });
-    _w=getWidth(_svg);
+    const _svg=viz.renderSVGElement(DOTstr, { engine: "dot", graphAttributes: { rankdir:"TB" } });
+    const _w=getWidth(_svg);
     if (_w<w)svg=_svg;
   }
   elm.innerHTML = "";
