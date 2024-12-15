@@ -118,7 +118,16 @@ var indexData;
 var dailyData;
 
 var renderViz = (elm, DOTstr) => {
+  var getWidth=(svg)=>parseInt(svg.getAttribute("width"),10);
   var svg = viz.renderSVGElement(DOTstr, { engine: "fdp", graphAttributes: { sep: "+12", K: 0.5, len: 0.3, fixedsize: false, width: 1 } });
+  var w = getWidth(svg);
+  if (w<16||w>1080)svg = viz.renderSVGElement(DOTstr, { engine: "dot", graphAttributes: { rankdir:"LR" } });
+  w = getWidth(svg);
+  if(w>960){
+    _svg=viz.renderSVGElement(DOTstr, { engine: "dot", graphAttributes: { rankdir:"TB" } });
+    _w=getWidth(_svg);
+    if (_w<w)svg=_svg;
+  }
   elm.innerHTML = "";
   elm.appendChild(svg);
   // elm.innerHTML += `<button class="zoom-out" onclick="event.stopPropagation();this.parentElement.classList.remove('full-size')"></button>`;
