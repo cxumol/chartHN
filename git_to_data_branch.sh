@@ -12,3 +12,4 @@ rsync -au ../chartHN_tmp/data/ ./
 git add .
 git commit -m "update $(date +%Y-%m-%d)" || echo "No changes to commit"
 git push origin data || echo "No changes to push"
+git checkout master
