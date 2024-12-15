@@ -134,7 +134,7 @@ var renderViz = (elm, DOTstr) => {
 };
 
 var loadIndex = async () => {
-  await fetch(`${urlPrefix}/index.json`,{cache:'no-cache'}).then(r=>r.json()).then(d=>window.indexData=d.data)//.catch(e=>console.error(e))
+  await fetch(`${urlPrefix}/index.json`,{cache:'no-store'}).then(r=>r.json()).then(d=>window.indexData=d.data)//.catch(e=>console.error(e))
 
   var allYears = new Set(indexData.years);
   indexData.months.forEach(ym => allYears.add(ym.slice(0, 4)));
