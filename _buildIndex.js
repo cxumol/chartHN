@@ -74,7 +74,7 @@ function processFilePaths(filePaths) {
         let isFullYear = true;
         for (const month in yearMonthDayMap[year]) {
             let isFullMonth = true;
-            const maxDay = month == 2 && isLeapYear(year) ? 29 : daysInMonths[month - 1];
+            const maxDay = (month == 2 && isLeapYear(year)) ? 29 : daysInMonths[month - 1];
 
             if (yearMonthDayMap[year][month].size !== maxDay) {
                 isFullMonth = false;
@@ -86,6 +86,7 @@ function processFilePaths(filePaths) {
             }
             isFullYear = isFullYear && isFullMonth;
         }
+        isFullYear = isFullYear && yearMonthDayMap[year].size === 12;
         if (isFullYear) {
             years.add(parseInt(year));
             for (const month in yearMonthDayMap[year]) {
