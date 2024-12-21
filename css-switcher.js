@@ -15,7 +15,8 @@ function css_inline_switcher() {
   window.switcher = document.getElementById("css-switcher");
   var dropdown = '\n<lable for="switcher_dropdown">Select a theme: </lable><select name="switcher_dropdown" id="switcher_dropdown" accesskey="s" onchange="switch_css(this.value)">\n';
   for (const f of css_themes) {
-    dropdown += '<option value="' + f + '">' + f[0].toUpperCase() + f.slice(1) + '</option>\n';
+    var selected = f==="base"?'selected':'';
+    dropdown += `<option value="${f}" ${selected}>${f[0].toUpperCase()+f.slice(1)}</option>\n`;
   }
   dropdown += '</select>\n';
   window.switcher.innerHTML = dropdown;
