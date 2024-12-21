@@ -8,11 +8,13 @@
     /*github.com/louismerlin/concrete.css*/
     :root{--fg:#111;--bg:#fff}@media (prefers-color-scheme:dark){:root{--fg:#fff;--bg:#111}}html{font-size:1.25rem;box-sizing:border-box}*,::after,::before{box-sizing:inherit;text-decoration-thickness:.1rem}body{margin:0;background:var(--bg);color:var(--fg);font-family:Helvetica,Arial,sans-serif}a{color:var(--fg)}/*figure{margin:0}figcaption{text-align:right;font-size:.8em;border-bottom:.2rem solid var(--fg);padding-bottom:.2rem}*/
     /*layout*/
+    main{max-width: 100% !important;}
     body {
       margin: 0;
       height: 100vh;
       display: flex;
       flex-direction: column;
+      max-width: 100% !important;
     }
     .as-main {
       display: flex;
@@ -91,6 +93,7 @@
   </style>
 </head>
 <body>
+  <script src="./css-switcher.js"></script>
   <header>
     <h1>ChartHN</h1>
   </header>
