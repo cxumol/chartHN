@@ -271,5 +271,10 @@ loadIndex().then(()=>{
   }
 })
   </script>
+  <script id="mobile-view">
+if (document.documentElement.clientWidth < 960) {
+  document.body.innerHTML = 'Oops, not working on mobile / small screens.';
+}
+  </script>
 </body>
 </html>
