@@ -26,6 +26,7 @@ function buildIndexJson(dataPath = 'data') {
             },
         };
         fs.writeFileSync('data/index.json', JSON.stringify(indexData, null, 0));
+        console.log("index json generated");
     } catch (error) {
         console.error('Error building index json:', error);
     }
