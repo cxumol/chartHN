@@ -64,6 +64,14 @@
       cursor: auto;
       overflow: auto;
     }
+    .viz-container svg { /* Set SVG to fill the container width by default */
+      width: 100%;
+      height: auto; /* Maintain aspect ratio */
+    }
+    .viz-container.full-size svg { /* Prevent any automatic scaling when full-size */
+      width: auto;
+      height: auto;
+    }
     .viz-container::after {
       content: '';
       position: absolute;
