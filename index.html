@@ -170,8 +170,8 @@ var updateMonthSelect = () => {
     indexData.months.filter(m => m.startsWith(theYear)).forEach(m => allMonths.add(m));
     indexData.days.filter(d => d.startsWith(theYear)).forEach(d => allMonths.add(d.slice(0, 7)));
   }
-  
   Array.from(allMonths).sort().forEach(m => monthSelect.add(new Option(m, m)));
+  listDate(monthSelect.value);
 }
 
 var listDate = (yearMonth) => {
