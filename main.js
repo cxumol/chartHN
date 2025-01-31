@@ -32,6 +32,7 @@ var mdToDot = async (md, cfg) => {
     } catch { console.error(_r.status, respDotTxt.slice(0, 10)); throw Error("Bad LLM API answer"); }
     var ans = respDotJson?.choices?.[0]?.message?.content?.trim();
     if (!ans) { console.error(respDotJson.error?.message ? respDotJson.error.message : respDotJson.slice(0, 20)); throw Error("Bad LLM API answer"); }
+    ans = ans.split('</think>').slice(-1)[0];
     ans = ans.match(/```.*?\n(.*?)```/s)?.[1];
     ans = await minifyDot(ans);
     if (!await validateDot(ans)) throw Error("Bad Dot data, from model: " + cfg.model);
