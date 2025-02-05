@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8" />
+  <title>Visual Summary GPT - Benchmark Edition</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.classless.min.css">
+  <style>
+    main {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2px;
+    }
+    .configs {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 5px;
+    }
+    .results {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+      gap: 5px;
+    }
+
+    .results > div {
+        width: 100%;
+        height: 500px;
+        border: 1px solid;
+        overflow: auto;
+    }
+
+    .benchmark-result {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 5px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h2>Visual Summary GPT - Benchmark Edition</h2>
+    <section>
+      <h3>Config (up to 4)</h3>
+      <div class="configs">
+        <textarea id="config1" rows="5">{
+  "base": "https://api.example/v1",
+  "key": "sk-",
+  "model": "gpt"
+}</textarea>
+        <textarea id="config2" rows="5">{
+  "base": "https://api.example/v1",
+  "key": "sk-",
+  "model": "gpt"
+}</textarea>
+        <textarea id="config3" rows="5">{
+  "base": "https://api.example/v1",
+  "key": "sk-",
+  "model": "gpt"
+}</textarea>
+        <textarea id="config4" rows="5">{
+  "base": "https://api.example/v1",
+  "key": "sk-",
+  "model": "gpt"
+}</textarea>
+      </div>
+    </section>
+
+    <section>
+      <h3>Article</h3>
+      <input type="url" id="url" style="width:100%;" placeholder="Enter URL to summarize" />
+      <button onclick="runBenchmark()">Run Benchmark</button>
+    </section>
+
+    <section>
+      <h3>Preview</h3>
+      <div class="results">
+        <div id="graph1"></div>
+        <div id="graph2"></div>
+        <div id="graph3"></div>
+        <div id="graph4"></div>
+      </div>
+    </section>
+
+    <section>
+      <h3>Benchmark</h3>
+      <p>successRate% (successCount / currentTestCount)</p>
+      <div class="benchmark-result" id="benchmark">
+        <div>Config 1: 0%</div>
+        <div>Config 2: 0%</div>
+        <div>Config 3: 0%</div>
+        <div>Config 4: 0%</div>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@viz-js/viz@3.11.0/lib/viz-standalone.min.js"></script>
+  <script>
+    const getId = Id => document.getElementById(Id);
+    const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+    const fetchWithRetry = async (url, options, retries = 3) => {
+      try {
+        const response = await fetch(url, options);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response;
+      } catch (error) {
+        if (retries > 0) {
+          console.error(`Request failed, retrying in 2 seconds...`, error);
+          await sleep(2000);
+          return fetchWithRetry(url, options, retries - 1);
+        } else {
+          console.error(`Request failed after multiple retries`, error);
+          throw error;
+        }
+      }
+    };
+
+    const renderViz = async (dotCode, elementId) => {
+      try {
+        const element = getId(elementId);
+        const viz = await Viz.instance();
+        const svg = viz.renderSVGElement(dotCode, { engine: "fdp", graphAttributes: { sep: "+10", K: 0.1, len: 0.5, fixedsize: false, width: 1 } });
+        element.innerHTML = "";
+        element.appendChild(svg);
+        return true;
+      } catch (error) {
+        console.error(`Failed to render SVG for ${elementId}`, error);
+        return false;
+      }
+    };
+
+    const runBenchmark = async () => {
+      const totalTestCount = 20; // 设置总测试次数
+      const configs = [
+        getId("config1").value,
+        getId("config2").value,
+        getId("config3").value,
+        getId("config4").value,
+      ].filter(config => config.trim() !== "").map(config=>JSON.parse(config));
+
+      const url = getId("url").value;
+      const md = await fetch(`https://r.jina.ai/${url}`).then(d => d.text());
+      const markdownContent = md.split("Markdown Content:")[1];
+
+      const benchmarkResults = [0,0,0,0]; //Array(configs.length).fill(0);
+      const currentTestCounts = [0,0,0,0]; //Array(configs.length).fill(0);
+
+      const updateBenchmarkDisplay = () => {
+        const benchmarkDiv = getId("benchmark");
+        benchmarkDiv.innerHTML = "";
+        benchmarkResults.forEach((successCount, index) => {
+          const currentTestCount = currentTestCounts[index];
+          const successRate = currentTestCount === 0 ? 0 : (successCount / currentTestCount) * 100;
+          const resultDiv = document.createElement("div");
+          resultDiv.textContent = `${configs[index].model}: ${successRate.toFixed(2)}% (${successCount}/${currentTestCount})`;
+          benchmarkDiv.appendChild(resultDiv);
+        });
+      };
+
+      const promises = configs.map(async (config, index) => {
+        for (let i = 0; i < totalTestCount; i++) {
+          currentTestCounts[index]++;
+          try {
+            const response = await fetchWithRetry(config.base + '/chat/completions', {
+              method: 'POST',
+              headers: { Authorization: 'Bearer ' + config.key, 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                model: config.model,
+                messages: [
+                  { role: "system", content: "You are multilingual data visualization creator. You keep a mind of the layout and you want to engage impressive styles to satisfy audience. Use ``` to wrap generated data." },
+                  { role: "user", content: "Create a Graphviz DOT diagram to visualize the main idea of the following content, written in the content's language: \n" + markdownContent }
+                ]
+              })
+            });
+            const responseData = await response.json();
+            const dotData = responseData.choices[0].message.content.trim();
+            const dotCode = dotData.match(/```.*?((graph |digraph ).*?)```/s)[1].trim();
+
+            const success = await renderViz(dotCode, `graph${index + 1}`);
+            if (success) benchmarkResults[index]++;
+          } catch (error) {
+            console.error(`Error during request for config ${index + 1}`, error);
+          }
+          updateBenchmarkDisplay();
+        }
+      });
+
+      await Promise.all(promises);
+    };
+  </script>
+  <footer><hr/>Need free LLM API? <a href="https://cloud.siliconflow.cn/i/FCmPLrM2">Sign up SiliconFlow with my invitation link</a> to receive 20,000 free tokens for so many LLM models including deepseek-R1 and llama-3.1-405B. 
+    <br/>Also, using their &lt;10B models is completely free.</footer>
+</body>
+</html>
