@@ -1,3 +1,9 @@
+## Viewer
+
+<https://cxumol.github.io/chartHN/>
+
+## Architecture
+
 ```
                                 ┌────────────────┐                             
                                 │                │                             
@@ -21,3 +27,11 @@
    └─────────┘                   └────────────┘                                
                                                                                
 ```
+
+## Acknowledgement
+
+- https://github.com/cxumol/dot-minify
+- https://r.jina.ai/
+- https://api.github.com/repos/headllines/hackernews-daily/issues
+- https://viz-js.com/api/
+- https://github.com/dohliam/dropin-minimal-css
