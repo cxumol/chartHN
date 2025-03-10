@@ -1,4 +1,4 @@
-## View
+## Access
 
 <https://cxumol.github.io/chartHN/>
 
