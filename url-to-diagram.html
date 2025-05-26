@@ -43,11 +43,9 @@
       const renderViz = async (dotCode) => {
         const element = getId("graph");
         const viz = await Viz.instance();
-        let svg;
-        try{svg = viz.renderSVGElement(dotCode, {engine: "fdp", graphAttributes:{sep:"+10",K:0.1,len:0.5,fixedsize:false,width:1}});console.log(svg);}
+        let svg;try{svg = viz.renderSVGElement(dotCode, {engine: "fdp", graphAttributes:{sep:"+10",K:0.1,len:0.5,fixedsize:false,width:1}});console.log(svg);}
         catch{window.alert("SVG rendering failed. Please try again or try another LLM.");return;}
-        const bbox = svg.getBBox();
-        element.style.cssText = `width:${bbox.width}pt;height:${bbox.height}pt;`;
+        element.style.cssText = `width:${svg.width.baseVal.valueAsString};height:${svg.height.baseVal.valueAsString};overflow:auto;`;
         element.innerHTML = "";
         element.appendChild(svg);
       };
@@ -80,7 +78,7 @@
     <div id="graph"></div>
   </section>
   </main>
-<footer><p>Some pages may not work due to login walls, WAF or AJAX. Website owners are not responsible for any legal issues arising from user-AI-generated content.</p></footer>
+<footer><hr/><p>Some pages may not work due to login walls, WAF or AJAX. Website owners are not responsible for any legal issues arising from user-AI-generated content.</p></footer>
   <script src="https://cdn.jsdelivr.net/npm/@viz-js/viz@3.11.0/lib/viz-standalone.min.js"></script>
 </body>
 </html>
