@@ -8,7 +8,6 @@
 <body>
   <script>
     var getId=Id=>document.getElementById(Id);
-    var dummy=x=>console.log(x);
     var BASE, KEY, MOD;
 
     var resetConfig=()=>{
@@ -21,6 +20,7 @@
     var go=async()=>{
       var cfg = JSON.parse(getId("config").value);
       BASE=cfg.base; KEY=cfg.key; MOD=cfg.model;
+      if(BASE==="https://api.example/v1"){window.alert("Please bring your own API config!");return;}
       var url = getId("url").value;
 
       var md = await fetch(`https://r.jina.ai/${url}`).then(d=>d.text());
@@ -37,11 +37,12 @@
         return respDotJson.choices[0].message.content.trim();
       };
 
-      const [dotData] = await Promise.all([getDot()]);
-      console.log(dotData);
+      const [dotData] = await Promise.all([getDot()]); // compatible for concurrent processing
+      // console.log(dotData);
 
       const renderViz = async (dotCode) => {
         const element = getId("graph");
+        element.style.cssText = "width:100vw;height:100vh;";
         const viz = await Viz.instance();
         const svg = viz.renderSVGElement(dotCode, {engine: "fdp", graphAttributes:{sep:"+10",K:0.1,len:0.5,fixedsize:false,width:1}});
         console.log(svg);
@@ -57,7 +58,7 @@
   <main>
   <h1>Visual Summary GPT</h1>
   <section>
-    <h2>Config</h2>
+    <h2>LLM API Config</h2>
     <textarea id="config" rows="5">{
   "base": "https://api.example/v1",
   "key": "sk-",
@@ -74,10 +75,10 @@
   
   <section>
     <h2>Result</h2>
-    <div id="graph" style="width:100vw;height:100vh;"></div>
+    <div id="graph"></div>
   </section>
   </main>
-<footer><p>Some pages may not work due to login walls or WAF. Website owners are not responsible for any legal issues arising from user-AI-generated content.</p></footer>
+<footer><p>Some pages may not work due to login walls, WAF or AJAX. Website owners are not responsible for any legal issues arising from user-AI-generated content.</p></footer>
   <script src="https://cdn.jsdelivr.net/npm/@viz-js/viz@3.11.0/lib/viz-standalone.min.js"></script>
 </body>
 </html>
