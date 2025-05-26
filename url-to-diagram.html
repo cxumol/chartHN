@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1" /><meta charset="utf-8" />
+  <title>Visual Summary GPT (URL to diagram)</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.classless.min.css">
+</head>
+<body>
+  <script>
+    var getId=Id=>document.getElementById(Id);
+    var dummy=x=>console.log(x);
+    var BASE, KEY, MOD;
+
+    var resetConfig=()=>{
+      getId("config").value=`{
+  "base": "https://api.example/v1",
+  "key": "sk-",
+  "model": "gpt"
+      }`;
+    }
+    var go=async()=>{
+      var cfg = JSON.parse(getId("config").value);
+      BASE=cfg.base; KEY=cfg.key; MOD=cfg.model;
+      var url = getId("url").value;
+
+      var md = await fetch(`https://r.jina.ai/${url}`).then(d=>d.text());
+      md = md.split("Markdown Content:")[1];
+
+      const getDot = async () => {
+        const respDotJson = await fetch(BASE+'/chat/completions', {
+          method: 'POST',headers:{Authorization:'Bearer '+KEY,'Content-Type':'application/json'},
+          body: JSON.stringify({model:MOD,messages:[
+            {role:"system",content:"You are multilingual data visualization creator. You keep a mind of the layout and you want to engage impressive styles to satisfy audience. Use ``` to wrap generated data."},
+            {role:"user",content:"Create a Graphviz DOT diagram to visualize the main idea of following content speaking the content's language: \n"+md}
+          ]})
+        }).then(d=>d.json());
+        return respDotJson.choices[0].message.content.trim();
+      };
+
+      const [dotData] = await Promise.all([getDot()]);
+      console.log(dotData);
+
+      const renderViz = async (dotCode) => {
+        const element = getId("graph");
+        const viz = await Viz.instance();
+        const svg = viz.renderSVGElement(dotCode, {engine: "fdp", graphAttributes:{sep:"+10",K:0.1,len:0.5,fixedsize:false,width:1}});
+        console.log(svg);
+        element.innerHTML = "";
+        element.appendChild(svg);
+      };
+
+      const dotCode = dotData.match(/```.*?((graph |digraph ).*?)```/s)[1];console.log(dotCode);
+      await renderViz(dotCode);
+    }
+  </script>
+  
+  <main>
+  <h1>Visual Summary GPT</h1>
+  <section>
+    <h2>Config</h2>
+    <textarea id="config" rows="5">{
+  "base": "https://api.example/v1",
+  "key": "sk-",
+  "model": "gpt"
+}</textarea>
+    <button onclick="resetConfig()">Reset</button>
+  </section>
+
+  <section>
+    <h2>URL</h2>
+    <input type="url" id="url" style="width:100%;" placeholder="Enter URL to summarize" />
+    <button onclick="go()">Let's Go</button>
+  </section>
+  
+  <section>
+    <h2>Result</h2>
+    <div id="graph" style="width:100vw;height:100vh;"></div>
+  </section>
+  </main>
+<footer><p>Some pages may not work due to login walls or WAF. Website owners are not responsible for any legal issues arising from user-AI-generated content.</p></footer>
+  <script src="https://cdn.jsdelivr.net/npm/@viz-js/viz@3.11.0/lib/viz-standalone.min.js"></script>
+</body>
+</html>
